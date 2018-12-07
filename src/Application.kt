@@ -8,7 +8,6 @@ import io.ktor.auth.*
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
-import io.ktor.features.HttpsRedirect
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.content.resources
@@ -33,7 +32,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-    if (!testing) install(HttpsRedirect)
+    // if (!testing) install(HttpsRedirect)
 
     install(Locations) {
     }

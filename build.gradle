@@ -2,14 +2,19 @@ buildscript {
     repositories {
         jcenter()
     }
-    
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
+plugins {
+    id "io.ratpack.ratpack-groovy" version "1.5.4"
+}
+
 apply plugin: 'kotlin'
 apply plugin: 'application'
+
 
 group 'cookbook'
 version '0.0.1'
@@ -41,4 +46,9 @@ dependencies {
     compile "io.ktor:ktor-server-sessions:$ktor_version"
     compile "io.ktor:ktor-auth:$ktor_version"
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
+}
+
+// Heroku integration
+task stage {
+    dependsOn installDist
 }
