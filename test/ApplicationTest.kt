@@ -1,25 +1,12 @@
 package com.zypus
 
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.html.*
-import kotlinx.html.*
-import kotlinx.css.*
-import io.ktor.content.*
-import io.ktor.http.content.*
-import io.ktor.locations.*
-import io.ktor.sessions.*
-import io.ktor.features.*
-import org.slf4j.event.*
-import io.ktor.auth.*
-import org.junit.Test
-
 //import io.ktor.client.features.auth.basic.*
-import kotlin.test.*
-import io.ktor.server.testing.*
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.withTestApplication
+import org.junit.Test
+import kotlin.test.assertEquals
 
 class ApplicationTest {
     @Test

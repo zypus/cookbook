@@ -9,6 +9,7 @@ import io.ktor.features.AutoHeadResponse
 import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
+import io.ktor.html.respondHtmlTemplate
 import io.ktor.http.ContentType
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
@@ -93,22 +94,6 @@ fun Application.module(testing: Boolean = false) {
             }
         }
 
-        // Static feature. Try to access `/static/ktor_logo.svg`
-        static("/static") {
-            resources("static")
-        }
-
-        get<MyLocation> {
-            call.respondText("Location: name=${it.name}, arg1=${it.arg1}, arg2=${it.arg2}")
-        }
-        // Register nested routes
-        get<Type.Edit> {
-            call.respondText("Inside $it")
-        }
-        get<Type.List> {
-            call.respondText("Inside $it")
-        }
-
         get("/session/increment") {
             val session = call.sessions.get<MySession>() ?: MySession()
             call.sessions.set(session.copy(count = session.count + 1))
@@ -116,23 +101,38 @@ fun Application.module(testing: Boolean = false) {
         }
 
         authenticate("myBasicAuth") {
+
+            get<Category> {
+                call.respondText("Inside $it")
+            }
+
+            get<Category.Recipe> { recipe ->
+                call.respondHtmlTemplate(MulticolumnTemplate()) {
+                    column1 {
+                        +"Hello, ${recipe.name}"
+                    }
+                    column2 {
+                        +"col2"
+                    }
+                }
+            }
+
             get("/protected/route/basic") {
                 val principal = call.principal<UserIdPrincipal>()!!
                 call.respondText("Hello ${principal.name}")
+            }
+
+            // Static feature. Try to access `/static/ktor_logo.svg`
+            static("/static") {
+                resources("static")
             }
         }
     }
 }
 
-@Location("/location/{name}")
-class MyLocation(val name: String, val arg1: Int = 42, val arg2: String = "default")
-
-@Location("/type/{name}") data class Type(val name: String) {
-    @Location("/edit")
-    data class Edit(val type: Type)
-
-    @Location("/list/{page}")
-    data class List(val type: Type, val page: Int)
+@Location("/categories/{name}") data class Category(val name: String) {
+    @Location("/{name}")
+    data class Recipe(val category: Category, val name: String)
 }
 
 data class MySession(val count: Int = 0)
