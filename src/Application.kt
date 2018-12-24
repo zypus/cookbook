@@ -9,10 +9,7 @@ import io.ktor.auth.Authentication
 import io.ktor.auth.UserIdPrincipal
 import io.ktor.auth.authenticate
 import io.ktor.auth.basic
-import io.ktor.features.AutoHeadResponse
-import io.ktor.features.CallLogging
-import io.ktor.features.DefaultHeaders
-import io.ktor.features.HttpsRedirect
+import io.ktor.features.*
 import io.ktor.html.respondHtmlTemplate
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -49,7 +46,10 @@ fun Application.module(testing: Boolean = false) {
 
     val sslEnabled = System.getenv("SSL_ENABLED") == "true"
 
-    if (sslEnabled) install(HttpsRedirect)
+    if (sslEnabled) {
+        install(HttpsRedirect)
+        install(XForwardedHeaderSupport)
+    }
 
     install(Locations) {
     }
