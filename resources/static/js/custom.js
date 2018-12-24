@@ -287,6 +287,8 @@ function placeCaretAtEnd(el) {
                 }
             })
 
+            $('spinner').fadeOut()
+
         };
 
         $("#image-upload").change(function () {

@@ -411,7 +411,7 @@ class MainTemplate : Template<HTML> {
                 section {
                     id = "main"
                     insert(content)
-                    div("spinner hide")
+                    div("spinner")
                     footer {
                         id = "footer"
                         div("copyright") {
