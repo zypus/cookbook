@@ -287,7 +287,7 @@ function placeCaretAtEnd(el) {
                 }
             })
 
-            $('spinner').fadeOut()
+            $('.spinner').fadeOut()
 
         };
 
