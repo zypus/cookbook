@@ -61,6 +61,7 @@ function placeCaretAtEnd(el) {
             var $clone = $TABLE.find('tr.hide:not(.header)').clone(true).removeClass('hide table-line');
             var $row = $(this).parents('tr');
             $row.after($clone);
+            $clone.firstChild().focus()
         });
 
         $('.table-remove').click(function () {

@@ -17,11 +17,13 @@ import java.util.*
 fun FlowOrInteractiveOrPhrasingContent.icon8(term: String,
                                              classes: String? = "icon8",
                                              set: String = "iOS-glyphs",
+                                             altSet: String = "iOS-glyphs",
+                                             altTerm: String = "broken_chain",
                                              size: Int? = 100,
                                              color: String? = null,
                                              block: IMG.() -> Unit = {}) {
     val escapedTerm = term.replace("[^a-zA-Z]+".toRegex(), "_")
-    img(alt = escapedTerm, src = icon8Url(escapedTerm, set, size, color), classes = classes, block = block)
+    img(alt = escapedTerm, src = icon8Url(escapedTerm, set, altSet, altTerm, size=size, color =color), classes = classes, block = block)
 }
 
 fun FlowOrInteractiveOrPhrasingContent.placeholderImg(term: String,
@@ -42,10 +44,37 @@ fun jdbcConnectInfo(): Triple<String, String, String> {
 fun icon8Url(
     term: String,
     set: String = "iOS",
+    altSet: String = "iOS",
+    altTerm: String = "broken_chain",
     size: Int? = 100,
-    color: String? = null): String {
-    return "https://png.icons8.com/$set/${term.replace("[^a-zA-Z]+".toRegex(), "_")}" + (size?.let { "/$it" } ?: "") + (color?.let { "/$it" }
-        ?: "")
+    color: String? = null): String? {
+
+    val urls = arrayListOf(
+        "https://png.icons8.com/$set/${term.replace("[^a-zA-Z]+".toRegex(), "_")}" + (size?.let { "/$it" }
+            ?: "") + (color?.let { "/$it" }
+            ?: ""),
+        "https://png.icons8.com/$altSet/${term.replace("[^a-zA-Z]+".toRegex(), "_")}" + (size?.let { "/$it" }
+            ?: "") + (color?.let { "/$it" }
+            ?: ""),
+        "https://png.icons8.com/$set/$altTerm" + (size?.let { "/$it" }
+            ?: "") + (color?.let { "/$it" }
+            ?: ""),
+        "https://png.icons8.com/$altSet/$altTerm" + (size?.let { "/$it" }
+            ?: "") + (color?.let { "/$it" }
+            ?: ""),
+        "https://png.icons8.com/$term" + (size?.let { "/$it" }
+            ?: "") + (color?.let { "/$it" }
+            ?: ""),
+        "https://png.icons8.com/$altTerm" + (size?.let { "/$it" }
+            ?: "") + (color?.let { "/$it" }
+            ?: "")
+    )
+
+    val url = urls.asSequence().map {
+        it.takeIf { khttp.get(it).statusCode == 200}
+    }.dropWhile { it == null }.firstOrNull()
+
+    return url
 }
 
 fun FlowOrPhrasingContent.highlighted(text: String, highlightLookup: Map<String, String>) {

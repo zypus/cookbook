@@ -47,8 +47,8 @@ fun Application.module(testing: Boolean = false) {
     val sslEnabled = System.getenv("SSL_ENABLED") == "true"
 
     if (sslEnabled) {
-        install(HttpsRedirect)
         install(XForwardedHeaderSupport)
+        install(HttpsRedirect)
     }
 
     install(Locations) {
@@ -306,7 +306,7 @@ fun Application.module(testing: Boolean = false) {
                                             val definition = robustDefintion(term)
                                             println("$term: $definition")
                                             val translatedTerm = definition ?: "ingredients"
-                                            icon8(translatedTerm, set = "dusk", classes = "icons8")
+                                            icon8(translatedTerm, set = "dusk", altSet = "color", altTerm = "ingredients", classes = "icons8")
                                         }
                                         ingredientName {
                                             span(colors[i.name]) {
@@ -337,7 +337,9 @@ fun Application.module(testing: Boolean = false) {
                                                 robustDefintion(s.instruction.firstWord()) ?: "ingredients",
                                                 classes = "largeIcon8",
                                                 size = 150,
-                                                set = "dusk"
+                                                set = "dusk",
+                                                altSet = "color",
+                                                altTerm = "ingredients"
                                             )
                                         }
                                         stepInstruction {
