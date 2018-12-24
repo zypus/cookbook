@@ -422,6 +422,8 @@ fun Application.module(testing: Boolean = false) {
                 val klaxon = Klaxon()
                 val json = call.receiveText()
 
+                println(json)
+
                 data class Title(val title: String)
 
                 val title = klaxon.parse<Title>(json)

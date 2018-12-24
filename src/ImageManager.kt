@@ -25,6 +25,8 @@ object ImageManager {
 
     fun getImageUrlFor(term: String, size: ImageSize = ImageSize.MEDIUM, lang: String = "de"): String? {
 
+        println("Requested: $term in $size")
+
         val imageCache = when (size) {
             ImageSize.SMALL -> smallImageCache
             ImageSize.MEDIUM -> mediumImageCache
@@ -50,7 +52,8 @@ object ImageManager {
 
             val s3Urls = hashMapOf(
                 ImageSize.SMALL to pixabayResult.smallUrl,
-                ImageSize.MEDIUM to pixabayResult.mediumUrl, ImageSize.LARGE to pixabayResult.largeUrl
+                ImageSize.MEDIUM to pixabayResult.mediumUrl,
+                ImageSize.LARGE to pixabayResult.largeUrl
             ).filter {
                 getImageFromS3(term, it.key).isNullOrBlank()
             }.map { (size, url) ->
@@ -69,7 +72,11 @@ object ImageManager {
                     url(key).toExternalForm()
                 }
 
-                imageCache[term] = s3Url
+                when (size) {
+                    ImageSize.SMALL -> smallImageCache[term] = s3Url
+                    ImageSize.MEDIUM -> mediumImageCache[term] = s3Url
+                    ImageSize.LARGE -> largeImageCache[term] = s3Url
+                }
 
                 size to s3Url
             }.toMap()
