@@ -30,6 +30,7 @@ sourceSets {
 repositories {
     mavenLocal()
     jcenter()
+    maven { url 'https://jitpack.io'}
     maven { url 'https://kotlin.bintray.com/ktor' }
     maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
 }
@@ -45,10 +46,18 @@ dependencies {
     compile "io.ktor:ktor-locations:$ktor_version"
     compile "io.ktor:ktor-server-sessions:$ktor_version"
     compile "io.ktor:ktor-auth:$ktor_version"
+    compile "org.apache.commons:commons-lang3:3.0"
+    compile "com.github.jkcclemens:khttp:-SNAPSHOT"
+    compile "org.postgresql:postgresql:42.2.2"
+    compile 'org.jetbrains.exposed:exposed:0.11.2'
+    compile "com.amazonaws:aws-java-sdk:1.11.163"
+    implementation "com.beust:klaxon:3.0.1"
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
 }
 
 // Heroku integration
-task stage {
+task stage(type: Copy) {
     dependsOn installDist
+    from "storage"
+    into "build/install/cookbook/app/storage"
 }
