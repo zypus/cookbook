@@ -46,8 +46,15 @@ object DataModel {
 
         transaction {
             addLogger(StdOutSqlLogger)
-            SchemaUtils.create(Users,
-                Categories, Measures, Recipes, Ingredients, Steps, Notes)
+            SchemaUtils.create(
+                Users,
+                Categories,
+                Measures,
+                Recipes,
+                Ingredients,
+                Steps,
+                Notes
+            )
             if(CategoryEntity.count() == 0) {
                 getDefaultCategories().forEach {
                     key, cat->
@@ -114,7 +121,8 @@ object DataModel {
         val recipes: Collection<Recipe>
     }
 
-    data class CategoryImpl(override val name: String, override val image: String?): Category {
+    data class CategoryImpl(override val name: String, override val image: String?):
+        Category {
         override val recipes: List<RecipeProxy>
         get() {
             val recipiesPath = File(categoriesPath, name)
@@ -151,7 +159,8 @@ object DataModel {
     }
 
     data class LoadedRecipe(override val name: String,
-                            override val image: String?, override val ingredients: List<Ingredient>, override val steps: List<Step>): Recipe
+                            override val image: String?, override val ingredients: List<Ingredient>, override val steps: List<Step>):
+        Recipe
 
     data class Amount(val value: Double,val unit: String, val scalar: Double = 1.0)
 
@@ -166,7 +175,8 @@ object DataModel {
         }
     }
 
-    class CategoryDb(val id: Int, override val name: String, override val image: String?): Category {
+    class CategoryDb(val id: Int, override val name: String, override val image: String?):
+        Category {
         override val recipes: Collection<Recipe>
             get() {
                 return transaction {
@@ -177,19 +187,31 @@ object DataModel {
             }
     }
 
-    class RecipeDb(val id: Int, override val name: String, override val image: String?): Recipe {
+    class RecipeDb(val id: Int, override val name: String, override val image: String?):
+        Recipe {
         override val ingredients: Collection<Ingredient> by lazy {
             transaction {
                 RecipeEntity.findById(id)!!.ingredients.sortedBy { it.number }.map {
                     val measure = it.measure
-                    Ingredient(it.name, Amount(it.amount.toDouble(), measure.symbol, measure.scalar.toDouble()))
+                    Ingredient(
+                        it.name,
+                        Amount(
+                            it.amount.toDouble(),
+                            measure.symbol,
+                            measure.scalar.toDouble()
+                        )
+                    )
                 }
             }
         }
         override val steps: Collection<Step> by lazy {
             transaction {
                 RecipeEntity.findById(id)!!.steps.sortedBy { it.number }.map {
-                    Step(it.instruction, "dummy", it.notes.firstOrNull()?.note, it.image?.let { Url(it) })
+                    Step(
+                        it.instruction,
+                        "dummy",
+                        it.notes.firstOrNull()?.note,
+                        it.image?.let { Url(it) })
                 }
             }
         }
@@ -302,7 +324,7 @@ object DataModel {
                         "images/${category.escapeHTML()}/${recipe.escapeHTML()}//$escapedName}".length
 
                     if (currentKeyLength > 236) {
-                        escapedName = escapedName.drop(currentKeyLength-236)
+                        escapedName = escapedName.drop(currentKeyLength - 236)
                     }
 
                     val seed = RandomStringUtils.randomAlphanumeric(minOf(42, 256 - maxOf(currentKeyLength, 236)))
@@ -419,6 +441,13 @@ object Measures: IntIdTable() {
     val symbol = varchar("symbol", 50)
     val scalar = float("scalar").default(1f)
 }
+
+object Icons: IntIdTable() {
+    val term = varchar("term", 128)
+    val translation = varchar("translation", 128)
+    val vetoed = text("vetoed").default("")
+}
+
 
 class User(id: EntityID<Int>): IntEntity(id) {
     companion object : IntEntityClass<User>(Users)

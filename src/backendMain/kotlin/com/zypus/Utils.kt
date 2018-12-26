@@ -23,7 +23,14 @@ fun FlowOrInteractiveOrPhrasingContent.icon8(term: String,
                                              color: String? = null,
                                              block: IMG.() -> Unit = {}) {
     val escapedTerm = term.replace("[^a-zA-Z]+".toRegex(), "_")
-    img(alt = escapedTerm, src = icon8Url(escapedTerm, set, altSet, altTerm, size=size, color =color), classes = classes, block = block)
+    img(alt = escapedTerm, src = icon8Url(
+        escapedTerm,
+        set,
+        altSet,
+        altTerm,
+        size = size,
+        color = color
+    ), classes = classes, block = block)
 }
 
 fun FlowOrInteractiveOrPhrasingContent.placeholderImg(term: String,

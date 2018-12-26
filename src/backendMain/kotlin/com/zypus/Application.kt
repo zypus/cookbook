@@ -14,8 +14,8 @@ import io.ktor.html.respondHtmlTemplate
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
+import io.ktor.http.content.files
 import io.ktor.http.content.forEachPart
-import io.ktor.http.content.resources
 import io.ktor.http.content.static
 import io.ktor.locations.*
 import io.ktor.request.path
@@ -146,13 +146,24 @@ fun Application.module(testing: Boolean = false) {
                     categories.forEach { cat ->
                         val categoryName = cat.name.capitalize()
                         categoriesUrl = application.locations.href(Categories())
-                        bannerImageUrl = ImageManager.getImageUrlFor("mediterranean_cuisine", lang = "en", size = ImageManager.ImageSize.LARGE)
+                        bannerImageUrl = ImageManager.getImageUrlFor(
+                            "mediterranean_cuisine",
+                            lang = "en",
+                            size = ImageManager.ImageSize.LARGE
+                        )
                         category {
-                            val categoryHref = application.locations.href(Categories.Category(cat.name.escapeHTML()))
+                            val categoryHref = application.locations.href(
+                                Categories.Category(
+                                    cat.name.escapeHTML()
+                                )
+                            )
                             a(href = categoryHref) {
                                 style {
                                     backgroundImage =
-                                            Image("url(${cat.image ?: ImageManager.getImageUrlFor(cat.name) ?: ImageManager.getImageUrlFor("recipe")})")
+                                            Image("url(${cat.image ?: ImageManager.getImageUrlFor(
+                                                cat.name
+                                            )
+                                            ?: ImageManager.getImageUrlFor("recipe")})")
                                 }
                             }
                             h3 {
@@ -178,10 +189,16 @@ fun Application.module(testing: Boolean = false) {
                         val categoryName = cat.name.capitalize()
 
                         galleryItem {
-                            val categoryHref = application.locations.href(Categories.Category(cat.name.escapeHTML()))
+                            val categoryHref = application.locations.href(
+                                Categories.Category(
+                                    cat.name.escapeHTML()
+                                )
+                            )
                             a(href = categoryHref) {
                                 style {
-                                    backgroundImage = Image("url(${cat.image ?: ImageManager.getImageUrlFor(cat.name)
+                                    backgroundImage = Image("url(${cat.image ?: ImageManager.getImageUrlFor(
+                                        cat.name
+                                    )
                                     ?: ImageManager.getImageUrlFor("recipe")})")
                                 }
                             }
@@ -228,7 +245,9 @@ fun Application.module(testing: Boolean = false) {
                                 a(href = recipeHref) {
                                     style {
                                         backgroundImage =
-                                                Image("url(${reci.image ?: ImageManager.getImageUrlFor(reci.name)
+                                                Image("url(${reci.image ?: ImageManager.getImageUrlFor(
+                                                    reci.name
+                                                )
                                                 ?: ImageManager.getImageUrlFor("recipe")})")
                                     }
                                 }
@@ -239,7 +258,12 @@ fun Application.module(testing: Boolean = false) {
                         }
 
                         footer {
-                            a(href = application.locations.href(Categories.Category.Recipe(categoryLoc, "new")), classes = "button big") {
+                            a(href = application.locations.href(
+                                Categories.Category.Recipe(
+                                    categoryLoc,
+                                    "new"
+                                )
+                            ), classes = "button big") {
                                 +"Neues Rezept hinzufügen"
                             }
                         }
@@ -277,8 +301,14 @@ fun Application.module(testing: Boolean = false) {
                         call.respondHtmlTemplate(RecipeTemplate()) {
 
                             recipeName = actualRecipe.name.capitalize()
-                            recipeImageUrl = actualRecipe.image ?: ImageManager.getImageUrlFor(actualRecipe.name, size=ImageManager.ImageSize.LARGE) ?: ImageManager
-                                    . getImageUrlFor ("recipe", ImageManager.ImageSize.LARGE)!!
+                            recipeImageUrl = actualRecipe.image ?:
+                                    ImageManager.getImageUrlFor(
+                                        actualRecipe.name,
+                                        size = ImageManager.ImageSize.LARGE
+                                    ) ?: ImageManager.getImageUrlFor(
+                                "recipe",
+                                ImageManager.ImageSize.LARGE
+                            )!!
 
                             imageUploadUrl = application.locations.href(recipeLoc) + "/image"
 
@@ -289,7 +319,11 @@ fun Application.module(testing: Boolean = false) {
                             )
 
                             category {
-                                a(href = application.locations.href(Categories.Category(category.name.escapeHTML()))) {
+                                a(href = application.locations.href(
+                                    Categories.Category(
+                                        category.name.escapeHTML()
+                                    )
+                                )) {
                                     +category.name.capitalize()
                                 }
                             }
@@ -334,7 +368,8 @@ fun Application.module(testing: Boolean = false) {
                                     step {
                                         stepImage {
                                             icon8(
-                                                robustDefintion(s.instruction.firstWord()) ?: "ingredients",
+                                                robustDefintion(s.instruction.firstWord())
+                                                    ?: "ingredients",
                                                 classes = "largeIcon8",
                                                 size = 150,
                                                 set = "dusk",
@@ -357,7 +392,10 @@ fun Application.module(testing: Boolean = false) {
                             isNew = true
 
                             recipeName = "Neues leckeres Rezept"
-                            recipeImageUrl = ImageManager.getImageUrlFor("recipe", size = ImageManager.ImageSize.LARGE)!!
+                            recipeImageUrl = ImageManager.getImageUrlFor(
+                                "recipe",
+                                size = ImageManager.ImageSize.LARGE
+                            )!!
 
                             imageUploadUrl = application.locations.href(recipeLoc) + "/image"
 
@@ -368,7 +406,11 @@ fun Application.module(testing: Boolean = false) {
                             )
 
                             category {
-                                a(href = application.locations.href(Categories.Category(category.name.escapeHTML()))) {
+                                a(href = application.locations.href(
+                                    Categories.Category(
+                                        category.name.escapeHTML()
+                                    )
+                                )) {
                                     +category.name.capitalize()
                                 }
                             }
@@ -406,7 +448,10 @@ fun Application.module(testing: Boolean = false) {
                         if (categoryLoc.categoryName == "new") {
                             DataModel.addCategory(processedTitle)
                         } else {
-                            DataModel.updateCategory(categoryLoc.categoryName, processedTitle)
+                            DataModel.updateCategory(
+                                categoryLoc.categoryName,
+                                processedTitle
+                            )
                         }
 
                         call.respondRedirect(application.locations.href(categoryLoc.copy(categoryName = processedTitle)))
@@ -436,9 +481,16 @@ fun Application.module(testing: Boolean = false) {
                             title.title.words().map { it.toLowerCase().capitalize() }.joinToString(separator = " ")
 
                         if (recipeLoc.name == "new") {
-                           DataModel.addRecipe(recipeLoc.category.categoryName, processedTitle)
+                            DataModel.addRecipe(
+                                recipeLoc.category.categoryName,
+                                processedTitle
+                            )
                         } else {
-                            DataModel.updateTitle(recipeLoc.category.categoryName, recipeLoc.name, processedTitle)
+                            DataModel.updateTitle(
+                                recipeLoc.category.categoryName,
+                                recipeLoc.name,
+                                processedTitle
+                            )
                         }
 
                         call.respondRedirect(application.locations.href(recipeLoc.copy(name = processedTitle)))
@@ -460,7 +512,11 @@ fun Application.module(testing: Boolean = false) {
                 val newIngredients = klaxon.parseArray<ExternalIngredient>(json)
 
                 if (newIngredients != null) {
-                    DataModel.updateIngredients(recipeLoc.category.categoryName, recipeLoc.name, newIngredients)
+                    DataModel.updateIngredients(
+                        recipeLoc.category.categoryName,
+                        recipeLoc.name,
+                        newIngredients
+                    )
                 }
 
                 call.respond(HttpStatusCode.OK)
@@ -481,7 +537,11 @@ fun Application.module(testing: Boolean = false) {
                 val newInstructions = klaxon.parseArray<ExternalInstruction>(json)
 
                 if (newInstructions != null) {
-                    DataModel.updateInstructions(recipeLoc.category.categoryName, recipeLoc.name, newInstructions)
+                    DataModel.updateInstructions(
+                        recipeLoc.category.categoryName,
+                        recipeLoc.name,
+                        newInstructions
+                    )
                 }
 
                 call.respond(HttpStatusCode.OK)
@@ -554,7 +614,7 @@ fun Application.module(testing: Boolean = false) {
 
             // Static feature. Try to access `/static/ktor_logo.svg`
             static("/static") {
-                resources("static")
+                files("web")
             }
         }
     }

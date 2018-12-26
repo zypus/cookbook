@@ -51,7 +51,10 @@ object S3Context {
 
     fun download(key: String, bucketName: String = defaultBucket) = client.getObject(bucketName, key)
 
-    fun read(key: String, bucketName: String = defaultBucket) = download(key, bucketName).objectContent as InputStream
+    fun read(key: String, bucketName: String = defaultBucket) = download(
+        key,
+        bucketName
+    ).objectContent as InputStream
 
     fun url(key: String, bucketName: String = defaultBucket) = client.getUrl(bucketName, key)
 

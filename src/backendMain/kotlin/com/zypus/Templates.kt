@@ -24,7 +24,7 @@ class CookbookTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML>
             menu {
                 item {
                     a(href = "/", classes = "active") {
-                        icon8("cookbook", set = "ios-glyphs", color=StyleGuide.highlightColor)
+                        icon8("cookbook", set = "ios-glyphs", color= StyleGuide.highlightColor)
                     }
                 }
             }
@@ -224,8 +224,10 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
     var isNew = false
     val category = Placeholder<FlowContent>()
     val recipe = Placeholder<FlowContent>()
-    val ingredient = TemplatePlaceholderList<IngredientTemplate, TABLE>()
-    val step = TemplatePlaceholderList<StepTemplate, OL>()
+    val ingredient =
+        TemplatePlaceholderList<IngredientTemplate, TABLE>()
+    val step =
+        TemplatePlaceholderList<StepTemplate, OL>()
     override fun HTML.apply() {
         insert(main) {
             menu {
@@ -261,7 +263,11 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                             id = "image-upload-form"
                             label {
                                 htmlFor = "image-upload"
-                                img(src = icon8Url("edit", "ios-glyphs", color = "FFFFFF"), classes = "control hide") {
+                                img(src = icon8Url(
+                                    "edit",
+                                    "ios-glyphs",
+                                    color = "FFFFFF"
+                                ), classes = "control hide") {
                                     id = "change-banner"
                                 }
                             }
@@ -334,19 +340,31 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                                     }
                                     td(classes = "controls hide") {
                                         img(
-                                            src = icon8Url("circled_chevron_down", set = "ios-glyphs"),
+                                            src = icon8Url(
+                                                "circled_chevron_down",
+                                                set = "ios-glyphs"
+                                            ),
                                             classes = "table-down control"
                                         )
                                         img(
-                                            src = icon8Url("slide_up", set = "ios-glyphs"),
+                                            src = icon8Url(
+                                                "slide_up",
+                                                set = "ios-glyphs"
+                                            ),
                                             classes = "table-up control"
                                         )
                                         img(
-                                            src = icon8Url("insert_row", set = "ios-glyphs"),
+                                            src = icon8Url(
+                                                "insert_row",
+                                                set = "ios-glyphs"
+                                            ),
                                             classes = "table-add control"
                                         )
                                         img(
-                                            src = icon8Url("delete_row", set = "ios-glyphs"),
+                                            src = icon8Url(
+                                                "delete_row",
+                                                set = "ios-glyphs"
+                                            ),
                                             classes = "table-remove control"
                                         )
                                     }
