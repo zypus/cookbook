@@ -487,21 +487,28 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                             h3 {
                                 +"Zubereitung"
                             }
-                            ol {
-                                id = "steps"
-                                each(step) {
-                                    insert(StepTemplate(), it)
+                            div {
+                                id = "step-container"
+                                ol {
+                                    id = "steps"
+                                    each(step) {
+                                        insert(StepTemplate(), it)
+                                    }
+                                    li("step") {
+                                        id = "template"
+                                        div("step-image") {
+                                            icon8("add_image", set = "dusk", size = 150, classes = "largeIcon8")
+                                        }
+                                        p("exportable") {
+                                            +""
+                                        }
+                                    }
                                 }
-                                li("step") {
-                                    id = "template"
-                                    div("step-image") {
-                                        icon8("add_image", set = "dusk", size = 150, classes = "largeIcon8")
-                                    }
-                                    p("exportable") {
-                                        +""
-                                    }
+                                p("signature") {
+                                    +author
                                 }
                             }
+
                             div("hide") {
                                 id = "steps-editor"
                                 ol("editor") {
@@ -550,6 +557,7 @@ class MainTemplate : Template<HTML> {
             link(rel = "stylesheet", href = "/static/css/main.css", type ="text/css")
 //            link(rel = "stylesheet", href = "/static/styles.css", type = "text/css")
             link(href = "https://img.icons8.com/ios-glyphs/30/000000/cooking-book.png", rel = "shortcut icon", type = "image/x-icon")
+            link(href = "https://fonts.googleapis.com/css?family=Tangerine", rel ="stylesheet")
         }
         body {
             div { id="test" }

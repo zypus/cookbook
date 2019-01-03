@@ -188,6 +188,7 @@ fun main(args: Array<String>) {
         val ingredientCancelButton = "#table-cancel".findHTMLElement()
 
         val list = "#steps".findOrderedList()
+        val stepsContainer = "#step-container".findDiv()
         val stepsEditor = "#steps-editor".findDiv()
         val stepsEditableList = "#steps-list".findOrderedList()
         val stepsError = "#steps-error".findParagraph()
@@ -267,7 +268,7 @@ fun main(args: Array<String>) {
             ingredientEditButton?.addClass("never-show")
             stepsEditButton?.addClass("never-show")
 
-            list?.hide()
+            stepsContainer?.hide()
             val entries = list?.getElementsByClassName("step")?.asList()?.filter { element ->
                 element is HTMLElement && element.isNotHidden && element.id != "template"
             }?.map { element ->
@@ -300,7 +301,7 @@ fun main(args: Array<String>) {
 
         stepsCancelButton?.onclick = {
             stepsEditor?.hide()
-            list?.unhide()
+            stepsContainer?.unhide()
             ingredientEditButton?.removeClass("never-show")
             stepsEditButton?.removeClass("never-show")
         }

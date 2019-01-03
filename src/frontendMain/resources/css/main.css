@@ -1997,6 +1997,15 @@ header #editable-title:hover::after {
 #time-entry {
 	float: right;
 	margin-top: 20px;
-	margin-bottom: 10px;
+	margin-bottom: 5px;
 	text-decoration: underline;
+}
+
+.signature {
+	text-align: center;
+	font-family: "Tangerine";
+	font-size: 5em;
+	margin: 0;
+	margin-top: -0.8em;
+	color: var(--highlight-color);
 }
