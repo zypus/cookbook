@@ -84,7 +84,7 @@ repositories {
 
 group 'cookbook'
 version '0.0.1'
-mainClassName = "com.zypus.ApplicationKt"
+mainClassName = "io.ktor.server.netty.EngineMain"
 //mainClassName = "io.ktor.server.netty.EngineMain"
 //
 //sourceSets {
@@ -141,8 +141,7 @@ task runBackend(type: JavaExec, dependsOn: [backendMainClasses, frontendJar]) {
 
 // Heroku integration
 task stage(type: Copy) {
-    dependsOn populateWebFolder
-    dependsOn installDist
+    dependsOn shadowJarBackend
 //    copy {
 //        from("src/frontendMain/web")
 //        into("build/install/cookbook/app/static")
