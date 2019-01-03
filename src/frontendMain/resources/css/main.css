@@ -2009,3 +2009,43 @@ header #editable-title:hover::after {
 	margin-top: -0.8em;
 	color: var(--highlight-color);
 }
+
+.icon-candidates:not(.hide) {
+	height: 35px;
+	background: white;
+	padding: 4px;
+	border-style: solid;
+	border-width: 2px;
+	border-radius: 4px;
+	border-color: var(--accent-color);
+	position: absolute;
+	margin-left: -4px;
+	margin-top: -4px;
+	display: flex;
+}
+
+.tooltip {
+	display: block;
+}
+
+.tooltip .tooltiptext {
+	display: none;
+	width: fit-content;
+	background-color: var(--highlight-color);
+	color: #fff;
+	text-align: center;
+	padding: 2px 4px;
+	border-radius: 6px;
+
+	/* Position the tooltip text - see examples below! */
+	position: absolute;
+	z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+	display: block;
+}
+
+.clickable {
+	cursor: pointer;
+}

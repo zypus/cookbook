@@ -52,7 +52,7 @@ object IngredientsParser : Grammar<List<DataModel.Ingredient>>() {
     val pk by token("Pk ")
     val sg by token("sg ")
     val prise by token("p ")
-    val word by token("[A-Za-zÄÖÜäöü()\\[\\]-]+")
+    val word by token("[A-Za-zÄÖÜäöüß()\\[\\]-]+")
 
     val numParser by num use { text.toDouble() }
 
@@ -512,6 +512,15 @@ object DataModel {
         )
     }
 
+    fun iconCandidatesForTerm(term: String, sets: List<String> = listOf("dusk", "color")): List<Pair<String, String>> {
+        return transaction {
+            val iconEntity = IconEntity.find {
+                Icons.term eq term.toLowerCase().escapeHTML() and Icons.set.inList(sets)
+            }.firstOrNull()
+            iconEntity?.candidates?.map { it.term to it.url } ?: emptyList()
+        }
+    }
+
     fun updateTime(category: String, recipe: String, type: String, newTime: String) {
         transaction {
             val reci = CategoryEntity.find {
@@ -542,6 +551,26 @@ object DataModel {
                 reci.yields = yields.toInt()
                 reci.yieldUnit = yieldUnit.trim()
                 reci.edited = DateTime.now()
+            }
+        }
+    }
+
+    fun updateIngredientIcon(category: String, recipe: String, index: Int, term: String) {
+        transaction {
+            val reci = CategoryEntity.find {
+                (Categories.name eq category)
+            }.first().recipes.find {
+                it.name == recipe
+            }
+            if (reci != null) {
+                val ingredientEntity = reci.ingredients.sortedBy { it.number }[index]
+                val iconEntity = IconEntity.find {
+                    Icons.term eq ingredientEntity.name.toLowerCase()
+                }.first()
+                val termEntity = iconEntity.candidates.first { it.term == term }
+                iconEntity.translation = termEntity.term
+                iconEntity.set = termEntity.set
+                iconEntity.url = termEntity.url
             }
         }
     }

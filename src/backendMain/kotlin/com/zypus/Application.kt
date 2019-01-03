@@ -354,7 +354,28 @@ fun Application.module(testing: Boolean = false) {
 //                                            val definition = robustDefintion(term)
 //                                            println("$term: $definition")
 //                                            val translatedTerm = definition ?: "ingredients"
-                                            img(src = DataModel.iconForTerm(i.name), classes = "icons8")
+                                            img(src = DataModel.iconForTerm(i.name), classes = "icons8") {
+                                                val candidates = DataModel.iconCandidatesForTerm(i.name)
+                                                if (candidates.size > 1) {
+                                                    this.classes += "clickable"
+                                                    div("hide icon-candidates") {
+                                                        candidates.forEach { (term, url) ->
+                                                            div("tooltip") {
+                                                                img(
+                                                                    alt = term,
+                                                                    src = url,
+                                                                    classes = "icon-candidate icons8"
+                                                                )
+                                                                span("tooltiptext") {
+                                                                    +term
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                }
+                                            }
+
 //                                            icon8(translatedTerm, set = "dusk", altSet = "color", altTerm = "ingredients", classes = "icons8")
                                         }
                                         ingredientName {
@@ -628,6 +649,25 @@ fun Application.module(testing: Boolean = false) {
 
             }
 
+
+            post<Categories.Category.Recipe.Ingredients.Icon> { loc ->
+
+                val recipeLoc = loc.ingredients.recipe
+
+                val alt = call.receiveText()
+
+                DataModel.updateIngredientIcon(
+                    recipeLoc.category.categoryName,
+                    recipeLoc.name,
+                    loc.index,
+                    alt
+                )
+
+
+                call.respond(HttpStatusCode.OK)
+
+            }
+
 //            get<StepImage> { imageLoc ->
 //                val recipeLoc = call.sessions.get<MySession>()?.currentRecipe
 //                if (recipeLoc != null) {
@@ -721,7 +761,10 @@ class Categories {
             data class Image(val recipe: Recipe)
 
             @Location(path = "/ingredients")
-            data class Ingredients(val recipe: Recipe)
+            data class Ingredients(val recipe: Recipe) {
+                @Location(path = "/{index}")
+                data class Icon(val ingredients: Ingredients, val index: Int)
+            }
 
             @Location(path = "/instructions")
             data class Instructions(val recipe: Recipe)

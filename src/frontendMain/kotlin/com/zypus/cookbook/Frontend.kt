@@ -475,6 +475,74 @@ fun main(args: Array<String>) {
             }
         }
 
+        ".ingredient-icon".findHTMLCollection().asList().forEachIndexed {
+            index, element ->
+            val icon = element as HTMLElement
+
+            if (icon.children.length > 0) {
+                val image =
+                    icon.getElementsByTagName("img").asList().first { !it.hasClass("icon-candidate") } as HTMLImageElement
+                val candidates = icon.getElementsByTagName("div")
+
+                if (candidates.length > 0) {
+                    val candidateContainer = candidates[0] as HTMLElement
+
+                    icon.onclick = {
+                        candidateContainer.unhide()
+                    }
+
+                    candidateContainer.onmouseleave = {
+                        candidateContainer.hide()
+                    }
+
+                    candidateContainer.getElementsByClassName("icon-candidate").asList().forEach {
+                        val candidate = it as HTMLImageElement
+
+                        candidate.onclick = {
+                            val request = XMLHttpRequest()
+                            request.open("POST", window.location.href + "/ingredients/$index", true)
+                            request.setRequestHeader("Content-Type", "text/plain; charset=utf-8")
+
+                            request.onreadystatechange = {
+                                if (request.readyState == 4.toShort()) {
+                                    if (request.responseText.isBlank()) {
+                                        image.src = candidate.src
+                                        candidateContainer.hide()
+                                    } else {
+                                        window.alert(request.responseText)
+                                    }
+                                }
+                            }
+
+                            request.send(candidate.alt)
+                        }
+                    }
+                }
+            }
+
+        }
+
+
+//        ".has-tooltip".findHTMLCollection().asList().filter { it is HTMLImageElement }.forEach {
+//            val image = it as HTMLImageElement
+//
+//            image.onmouseenter = {
+//                println("test")
+//                image.append {
+//                    p("tooltip") {
+//                        +image.alt
+//                    }
+//                }
+//            }
+//
+//            image.onmouseleave = {
+//                image.getElementsByClassName("tooltip").asList().forEach {
+//                    it.remove()
+//                }
+//            }
+//
+//        }
+
     }
 
 }
