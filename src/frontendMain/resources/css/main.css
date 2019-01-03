@@ -443,6 +443,11 @@
 			opacity: 0.25;
 		}
 
+		.button.cancel:not(:hover) {
+			/*background-color: #a2404b;*/
+			background-color: #e42f51;
+		}
+
 		@media screen and (max-width: 480px) {
 
 			input[type="submit"],
@@ -454,6 +459,11 @@
 			}
 
 		}
+
+.buttons {
+	width: 100%;
+	display: flex;
+}
 
 /* recipe */
 
@@ -607,7 +617,7 @@ header #editable-title:hover::after {
 	text-align: right;
 }
 
-.ingredient-icon {
+.ingredient-icon:not(.hide) {
 	display: inline-flex;
 }
 
@@ -621,7 +631,33 @@ header #editable-title:hover::after {
 	padding: 0.5em 0.1em;
 }
 
+.editor {
+	background: white;
+	padding: 0 30px;
+	border-radius: 10px;
+	outline-color: var(--accent-color);
+	outline-offset: 10px;
+}
+
+.editor-field, #banner h1.editor-field {
+	background: white;
+	color: black;
+	padding: 0 10px;
+	border-radius: 10px;
+	outline-color: var(--accent-color);
+	outline-offset: 5px;
+}
+
+.error {
+	color: #e42f51;
+	font-weight: bold;
+}
+
 /* Steps */
+
+#steps {
+	padding-top: 1em;
+}
 
 .steps {
 	padding: 2em;
@@ -1811,6 +1847,62 @@ header #editable-title:hover::after {
 
 		}
 
+	#recipe-info {
+		bottom: 10px;
+		z-index: 3;
+		display: inline-grid;
+		grid-template-columns: 40% 20% 40%;
+		width: 100%;
+		padding-left: 5%;
+		padding-right: 5%;
+		position: absolute;
+	}
+
+	#recipe-yield, #recipe-scaling, #recipe-time {
+		display: flex;
+	}
+
+	#recipe-yield {
+		width: fit-content;
+		display: flex;
+	}
+
+	#recipe-time {
+		width: fit-content;
+		display: inline-flex;
+		float: right;
+	}
+
+	#recipe-info p {
+		margin-bottom: 0;
+		margin-left: 10px;
+		margin-right: 3px;
+	}
+
+	.time {
+		display: flex;
+	}
+
+	#recipe-info .icons8 {
+		margin: auto;
+	}
+
+    #recipe-yield, .time {
+        cursor: pointer;
+    }
+
+    #recipe-yield:hover::after, .time:hover::after {
+        background-image: url("https://png.icons8.com/ios-glyphs/edit/60/FFFFFF");
+        background-size: 30px;
+        display: inline-block;
+        position: absolute;
+		margin-left: 20px;
+		margin-top: -25px;
+        width: 30px;
+        height: 30px;
+        content: "";
+    }
+
 /* Main */
 
 	#main {
@@ -1889,4 +1981,22 @@ header #editable-title:hover::after {
 	height: 100%;
 	z-index: 9999;
 	background: url(../images/spinner.svg) center no-repeat #f1f1f1;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+}
+
+.center .button {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#time-entry {
+	float: right;
+	margin-top: 20px;
+	margin-bottom: 10px;
+	text-decoration: underline;
 }

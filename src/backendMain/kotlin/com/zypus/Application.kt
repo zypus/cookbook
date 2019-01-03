@@ -2,21 +2,13 @@ package com.zypus
 
 import com.beust.klaxon.Klaxon
 import com.zypus.datamodel.DataModel
-import com.zypus.datamodel.ExternalIngredient
-import com.zypus.datamodel.ExternalInstruction
 import io.ktor.application.*
-import io.ktor.auth.Authentication
-import io.ktor.auth.UserIdPrincipal
-import io.ktor.auth.authenticate
-import io.ktor.auth.basic
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.html.respondHtmlTemplate
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.PartData
-import io.ktor.http.content.files
-import io.ktor.http.content.forEachPart
-import io.ktor.http.content.static
+import io.ktor.http.content.*
 import io.ktor.locations.*
 import io.ktor.request.path
 import io.ktor.request.receiveMultipart
@@ -34,6 +26,7 @@ import kotlinx.css.CSSBuilder
 import kotlinx.css.Image
 import kotlinx.html.*
 import org.slf4j.event.Level
+import java.io.File
 import kotlin.collections.set
 
 //import io.ktor.client.features.auth.basic.*
@@ -43,6 +36,8 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+
+    println(File(".").absolutePath)
 
     val sslEnabled = System.getenv("SSL_ENABLED") == "true"
 
@@ -75,12 +70,13 @@ fun Application.module(testing: Boolean = false) {
         basic("myBasicAuth") {
             realm = "Ktor Server"
             validate {
-                if (DataModel.validate(it.name, it.password)) UserIdPrincipal(it.name) else null }
+                DataModel.validate(it.name, it.password)?.let { id -> UserIdPrincipal(id.toString()) }
+            }
         }
     }
 
     routing {
-//        get("/html-dsl") {
+        //        get("/html-dsl") {
 //            call.respondHtml {
 //                body {
 //                    h1 { +"HTML" }
@@ -160,10 +156,12 @@ fun Application.module(testing: Boolean = false) {
                             a(href = categoryHref) {
                                 style {
                                     backgroundImage =
-                                            Image("url(${cat.image ?: ImageManager.getImageUrlFor(
-                                                cat.name
+                                            Image(
+                                                "url(${cat.image ?: ImageManager.getImageUrlFor(
+                                                    cat.name
+                                                )
+                                                ?: ImageManager.getImageUrlFor("recipe")})"
                                             )
-                                            ?: ImageManager.getImageUrlFor("recipe")})")
                                 }
                             }
                             h3 {
@@ -196,10 +194,12 @@ fun Application.module(testing: Boolean = false) {
                             )
                             a(href = categoryHref) {
                                 style {
-                                    backgroundImage = Image("url(${cat.image ?: ImageManager.getImageUrlFor(
-                                        cat.name
+                                    backgroundImage = Image(
+                                        "url(${cat.image ?: ImageManager.getImageUrlFor(
+                                            cat.name
+                                        )
+                                        ?: ImageManager.getImageUrlFor("recipe")})"
                                     )
-                                    ?: ImageManager.getImageUrlFor("recipe")})")
                                 }
                             }
                             h3 {
@@ -227,6 +227,7 @@ fun Application.module(testing: Boolean = false) {
 
                 if (category != null) {
                     call.respondHtmlTemplate(GalleryTemplate()) {
+                        isEditable = true
                         galleryName = category.name.capitalize()
                         menuList = arrayListOf(
                             "categories" to application.locations.href(Categories()),
@@ -245,10 +246,12 @@ fun Application.module(testing: Boolean = false) {
                                 a(href = recipeHref) {
                                     style {
                                         backgroundImage =
-                                                Image("url(${reci.image ?: ImageManager.getImageUrlFor(
-                                                    reci.name
+                                                Image(
+                                                    "url(${reci.image ?: ImageManager.getImageUrlFor(
+                                                        reci.name
+                                                    )
+                                                    ?: ImageManager.getImageUrlFor("recipe")})"
                                                 )
-                                                ?: ImageManager.getImageUrlFor("recipe")})")
                                     }
                                 }
                                 h3 {
@@ -258,12 +261,14 @@ fun Application.module(testing: Boolean = false) {
                         }
 
                         footer {
-                            a(href = application.locations.href(
-                                Categories.Category.Recipe(
-                                    categoryLoc,
-                                    "new"
-                                )
-                            ), classes = "button big") {
+                            a(
+                                href = application.locations.href(
+                                    Categories.Category.Recipe(
+                                        categoryLoc,
+                                        "new"
+                                    )
+                                ), classes = "button big"
+                            ) {
                                 +"Neues Rezept hinzufügen"
                             }
                         }
@@ -301,14 +306,21 @@ fun Application.module(testing: Boolean = false) {
                         call.respondHtmlTemplate(RecipeTemplate()) {
 
                             recipeName = actualRecipe.name.capitalize()
-                            recipeImageUrl = actualRecipe.image ?:
-                                    ImageManager.getImageUrlFor(
-                                        actualRecipe.name,
-                                        size = ImageManager.ImageSize.LARGE
-                                    ) ?: ImageManager.getImageUrlFor(
+                            recipeImageUrl = actualRecipe.image ?: ImageManager.getImageUrlFor(
+                                actualRecipe.name,
+                                size = ImageManager.ImageSize.LARGE
+                            ) ?: ImageManager.getImageUrlFor(
                                 "recipe",
                                 ImageManager.ImageSize.LARGE
                             )!!
+
+                            author = actualRecipe.author
+
+                            recipeYield = actualRecipe.yields to actualRecipe.yieldUnit
+                            time = actualRecipe.prepTime to actualRecipe.cookTime
+
+                            created = actualRecipe.created.toLocalDate().toString("dd-MM-yyyy")
+                            updated = actualRecipe.updated.toLocalDateTime().toString("dd-MM-yyyy HH:mm:ss")
 
                             imageUploadUrl = application.locations.href(recipeLoc) + "/image"
 
@@ -319,11 +331,13 @@ fun Application.module(testing: Boolean = false) {
                             )
 
                             category {
-                                a(href = application.locations.href(
-                                    Categories.Category(
-                                        category.name.escapeHTML()
+                                a(
+                                    href = application.locations.href(
+                                        Categories.Category(
+                                            category.name.escapeHTML()
+                                        )
                                     )
-                                )) {
+                                ) {
                                     +category.name.capitalize()
                                 }
                             }
@@ -336,11 +350,12 @@ fun Application.module(testing: Boolean = false) {
                                 actualRecipe.ingredients.forEach { i ->
                                     ingredient {
                                         ingredientImage {
-                                            val term = i.name.lastWord().toLowerCase()
-                                            val definition = robustDefintion(term)
-                                            println("$term: $definition")
-                                            val translatedTerm = definition ?: "ingredients"
-                                            icon8(translatedTerm, set = "dusk", altSet = "color", altTerm = "ingredients", classes = "icons8")
+                                            //                                            val term = i.name.lastWord().toLowerCase()
+//                                            val definition = robustDefintion(term)
+//                                            println("$term: $definition")
+//                                            val translatedTerm = definition ?: "ingredients"
+                                            img(src = DataModel.iconForTerm(i.name), classes = "icons8")
+//                                            icon8(translatedTerm, set = "dusk", altSet = "color", altTerm = "ingredients", classes = "icons8")
                                         }
                                         ingredientName {
                                             span(colors[i.name]) {
@@ -348,11 +363,7 @@ fun Application.module(testing: Boolean = false) {
                                             }
                                         }
                                         amountValue {
-                                            if (i.amount.value.rem(i.amount.value.toInt()) == 0.0) {
-                                                +i.amount.value.toInt().toString()
-                                            } else {
-                                                +i.amount.value.toString()
-                                            }
+                                            +i.amount.format()
                                         }
                                         amountUnit {
                                             +i.amount.unit
@@ -367,15 +378,15 @@ fun Application.module(testing: Boolean = false) {
                                 actualRecipe.steps.forEach { s ->
                                     step {
                                         stepImage {
-                                            icon8(
-                                                robustDefintion(s.instruction.firstWord())
-                                                    ?: "ingredients",
-                                                classes = "largeIcon8",
-                                                size = 150,
-                                                set = "dusk",
-                                                altSet = "color",
-                                                altTerm = "ingredients"
-                                            )
+                                            //                                            icon8(
+//                                                robustDefintion(s.instruction.firstWord())
+//                                                    ?: "ingredients",
+//                                                classes = "largeIcon8",
+//                                                size = 150,
+//                                                set = "dusk",
+//                                                altSet = "color",
+//                                                altTerm = "ingredients"
+//                                            )
                                         }
                                         stepInstruction {
                                             highlighted(s.instruction, colors)
@@ -392,6 +403,10 @@ fun Application.module(testing: Boolean = false) {
                             isNew = true
 
                             recipeName = "Neues leckeres Rezept"
+                            val principal: UserIdPrincipal? = call.authentication.principal()
+                            if (principal != null) {
+                                author = DataModel.getUsername(principal.name.toInt())
+                            }
                             recipeImageUrl = ImageManager.getImageUrlFor(
                                 "recipe",
                                 size = ImageManager.ImageSize.LARGE
@@ -406,11 +421,13 @@ fun Application.module(testing: Boolean = false) {
                             )
 
                             category {
-                                a(href = application.locations.href(
-                                    Categories.Category(
-                                        category.name.escapeHTML()
+                                a(
+                                    href = application.locations.href(
+                                        Categories.Category(
+                                            category.name.escapeHTML()
+                                        )
                                     )
-                                )) {
+                                ) {
                                     +category.name.capitalize()
                                 }
                             }
@@ -465,25 +482,20 @@ fun Application.module(testing: Boolean = false) {
                 val recipeLoc = loc.recipe
 
                 val klaxon = Klaxon()
-                val json = call.receiveText()
+                val title = call.receiveText()
 
-                println(json)
-
-                data class Title(val title: String)
-
-                val title = klaxon.parse<Title>(json)
-
-                if (title != null) {
-                    if(title.title.escapeHTML() == recipeLoc.name) {
-                        call.respond(HttpStatusCode.OK)
-                    } else {
-                        val processedTitle =
-                            title.title.words().map { it.toLowerCase().capitalize() }.joinToString(separator = " ")
-
+                if (title.escapeHTML() == recipeLoc.name) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    val processedTitle =
+                        title.words().joinToString(separator = " ") { it.toLowerCase().capitalize() }
+                    try {
                         if (recipeLoc.name == "new") {
+                            val principal: UserIdPrincipal? = call.authentication.principal()
                             DataModel.addRecipe(
                                 recipeLoc.category.categoryName,
-                                processedTitle
+                                processedTitle,
+                                authorId = principal!!.name.toInt()
                             )
                         } else {
                             DataModel.updateTitle(
@@ -492,9 +504,12 @@ fun Application.module(testing: Boolean = false) {
                                 processedTitle
                             )
                         }
-
-                        call.respondRedirect(application.locations.href(recipeLoc.copy(name = processedTitle)))
+                    } catch (e: Exception) {
+                        call.respond(e.message!!)
+                        return@post
                     }
+
+                    call.respondRedirect(application.locations.href(recipeLoc.copy(name = processedTitle)))
                 }
 
             }
@@ -505,20 +520,21 @@ fun Application.module(testing: Boolean = false) {
 
                 if (recipeLoc.name == "new") {
                     call.respond("Das Rezept muss zuerst benannt werden, bevor Zutaten hinzugefügt werden können.")
+                    return@post
                 }
 
-                val klaxon = Klaxon()
-                val json = call.receiveText()
-                val newIngredients = klaxon.parseArray<ExternalIngredient>(json)
+                val newIngredients = call.receiveText()
 
-                if (newIngredients != null) {
+                try {
                     DataModel.updateIngredients(
                         recipeLoc.category.categoryName,
                         recipeLoc.name,
                         newIngredients
                     )
+                } catch (e: java.lang.Exception) {
+                    call.respond(HttpStatusCode.OK, e.message!!)
+                    return@post
                 }
-
                 call.respond(HttpStatusCode.OK)
 
             }
@@ -529,20 +545,16 @@ fun Application.module(testing: Boolean = false) {
 
                 if (recipeLoc.name == "new") {
                     call.respond("Das Rezept muss zuerst benannt werden, bevor Zubereitungsschritte hinzugefügt werden können.")
+                    return@post
                 }
 
-                val klaxon = Klaxon()
-                val json = call.receiveText()
-                println(json)
-                val newInstructions = klaxon.parseArray<ExternalInstruction>(json)
+                val newInstructions = call.receiveText()
 
-                if (newInstructions != null) {
-                    DataModel.updateInstructions(
-                        recipeLoc.category.categoryName,
-                        recipeLoc.name,
-                        newInstructions
-                    )
-                }
+                DataModel.updateInstructions(
+                    recipeLoc.category.categoryName,
+                    recipeLoc.name,
+                    newInstructions
+                )
 
                 call.respond(HttpStatusCode.OK)
 
@@ -583,6 +595,39 @@ fun Application.module(testing: Boolean = false) {
 
             }
 
+            post<Categories.Category.Recipe.Time> { loc ->
+
+                val recipeLoc = loc.recipe
+
+                val newTime = call.receiveText()
+
+                DataModel.updateTime(
+                    recipeLoc.category.categoryName,
+                    recipeLoc.name,
+                    loc.type,
+                    newTime
+                )
+
+                call.respond(HttpStatusCode.OK)
+
+            }
+
+            post<Categories.Category.Recipe.Yields> { loc ->
+
+                val recipeLoc = loc.recipe
+
+                val newYield = call.receiveText()
+
+                DataModel.updateYield(
+                    recipeLoc.category.categoryName,
+                    recipeLoc.name,
+                    newYield
+                )
+
+                call.respond(HttpStatusCode.OK)
+
+            }
+
 //            get<StepImage> { imageLoc ->
 //                val recipeLoc = call.sessions.get<MySession>()?.currentRecipe
 //                if (recipeLoc != null) {
@@ -614,6 +659,7 @@ fun Application.module(testing: Boolean = false) {
 
             // Static feature. Try to access `/static/ktor_logo.svg`
             static("/static") {
+                staticRootFolder = File(".")
                 files("web")
             }
         }
@@ -665,16 +711,26 @@ class Categories {
     data class Category(val categoryName: String) {
         @Location(path = "/title")
         data class Title(val category: Category)
+
         @Location("/{name}")
         data class Recipe(val category: Category, val name: String) {
             @Location(path = "/title")
             data class Title(val recipe: Recipe)
+
             @Location(path = "/image")
             data class Image(val recipe: Recipe)
+
             @Location(path = "/ingredients")
             data class Ingredients(val recipe: Recipe)
+
             @Location(path = "/instructions")
             data class Instructions(val recipe: Recipe)
+
+            @Location(path = "/time/{type}")
+            data class Time(val recipe: Recipe, val type: String)
+
+            @Location(path = "/yield")
+            data class Yields(val recipe: Recipe)
         }
 
     }

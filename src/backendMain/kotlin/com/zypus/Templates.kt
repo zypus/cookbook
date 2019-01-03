@@ -1,5 +1,6 @@
 package com.zypus
 
+import com.zypus.datamodel.DataModel
 import io.ktor.html.*
 import kotlinx.css.Image
 import kotlinx.css.LinearDimension
@@ -172,7 +173,7 @@ class StepTemplate() : Template<OL> {
             div("step-image") {
                 insert(stepImage)
             }
-            p {
+            p("exportable") {
                 insert(stepInstruction)
             }
 //            div("stepInstruction") {
@@ -191,16 +192,16 @@ class IngredientTemplate() : Template<TABLE> {
     val amountUnit = Placeholder<TD>()
     override fun TABLE.apply() {
         tr("ingredient") {
-            td("ingredient-amount exportable editable") {
+            td("ingredient-amount exportable editable no-edit") {
                 insert(amountValue)
             }
-            td("exportable editable") {
+            td("exportable editable no-edit") {
                 insert(amountUnit)
             }
-            td("ingredient-icon") {
+            td("ingredient-icon no-edit") {
                 insert(ingredientImage)
             }
-            td("ingredient-name exportable editable") {
+            td("ingredient-name exportable editable no-edit") {
                 insert(ingredientName)
             }
             td(classes = "controls hide") {
@@ -219,8 +220,13 @@ class IngredientTemplate() : Template<TABLE> {
 class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
     var menuList: List<Pair<String, String>> = arrayListOf()
     var recipeName = "Leckeres Rezept ohne Namen"
+    var author = ""
+    var recipeYield = 1 to "Personen"
+    var time = 10 to 10
     var imageUploadUrl = ""
     var recipeImageUrl = ""
+    var created = ""
+    var updated = ""
     var isNew = false
     val category = Placeholder<FlowContent>()
     val recipe = Placeholder<FlowContent>()
@@ -287,7 +293,78 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                             }
                             +recipeName
                         }
-//                        p { +"The shared cookbook of the Fränz family" }
+                        p {
+                            em {
+                                +"by $author"
+                            }
+                        }
+                    }
+                    if (!isNew) {
+                        div {
+                            id = "recipe-info"
+                            div {
+                                div {
+                                    id = "recipe-yield"
+                                    p {
+                                        +recipeYield.first.toString()
+                                    }
+                                    img(
+                                        src = DataModel.iconForTerm(
+                                            recipeYield.second,
+                                            listOf("ios-glyphs")
+                                        ) + "/FFFFFF",
+                                        classes = "icons8"
+                                    )
+                                    p("hide editor-field") {
+                                        contentEditable = true
+                                        +"${recipeYield.first} ${recipeYield.second}"
+                                    }
+                                }
+                            }
+                            div {
+                                div {
+                                    id = "recipe-scaling"
+                                    img(
+                                        src = icon8Url("measurement_scale", set = "ios-glyphs", color = "FFFFFF"),
+                                        classes = "icons8 control"
+                                    )
+                                }
+                            }
+                            div {
+                                div {
+                                    id = "recipe-time"
+                                    div("time") {
+                                        p {
+                                            span {
+                                                id = "prep"
+                                                contentEditable = true
+                                                +"${time.first}"
+                                            }
+                                            +" min"
+                                        }
+                                        img(
+                                            src = icon8Url("chef_knife", set = "ios-glyphs", color = "FFFFFF"),
+                                            classes = "icons8"
+                                        )
+                                    }
+                                    div("time") {
+                                        p {
+                                            span {
+                                                id = "cook"
+                                                contentEditable = true
+                                                +"${time.second}"
+                                            }
+                                            +" min"
+                                        }
+                                        img(
+                                            src = icon8Url("gas", set = "ios-glyphs", color = "FFFFFF"),
+                                            classes = "icons8"
+                                        )
+                                    }
+
+                                }
+                            }
+                        }
                     }
                 }
                 section {
@@ -298,16 +375,17 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                             img(src = icon8Url("edit", "ios-glyphs"), classes = "control hide") {
                                 id = "make-editable"
                             }
-                            img(src = icon8Url("cancel", "ios-glyphs"), classes = "control hide") {
-                                id = "table-cancel"
-                            }
-                            img(src = icon8Url("save", "ios-glyphs"), classes = "control hide") {
-                                id = "export-btn"
-                            }
+//                            img(src = icon8Url("cancel", "ios-glyphs"), classes = "control hide") {
+//                                id = "table-cancel"
+//                            }
+//                            img(src = icon8Url("save", "ios-glyphs"), classes = "control hide") {
+//                                id = "export-btn"
+//                            }
                             h3 {
                                 +"Zutaten"
                             }
-                            table("ingredients") {
+                            table {
+                                id = "ingredients-table"
                                 tr("header hide") {
                                     th { +"amount" }
                                     th { +"measure" }
@@ -370,6 +448,28 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                                     }
                                 }
                             }
+                            div("hide") {
+                                id = "ingredients-editor"
+                                ul("editor") {
+                                    contentEditable = true
+                                    id = "ingredients-list"
+                                }
+                                div("buttons") {
+                                    div("center") {
+                                        p("button big cancel") {
+                                            id = "table-cancel"
+                                            +"Abbrechen"
+                                        }
+                                        p("button big") {
+                                            id = "export-btn"
+                                            +"Speichern"
+                                        }
+                                    }
+                                }
+                                p("error") {
+                                    id = "ingredients-error"
+                                }
+                            }
                         }
                     }
                     div("column") {
@@ -378,16 +478,17 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                             img(src = icon8Url("edit", "ios-glyphs"), classes = "control hide") {
                                 id = "make-list-editable"
                             }
-                            img(src = icon8Url("cancel", "ios-glyphs"), classes = "control hide") {
-                                id = "list-cancel"
-                            }
-                            img(src = icon8Url("save", "ios-glyphs"), classes = "control hide") {
-                                id = "list-save"
-                            }
+//                            img(src = icon8Url("cancel", "ios-glyphs"), classes = "control hide") {
+//                                id = "list-cancel"
+//                            }
+//                            img(src = icon8Url("save", "ios-glyphs"), classes = "control hide") {
+//                                id = "list-save"
+//                            }
                             h3 {
                                 +"Zubereitung"
                             }
-                            ol("steps") {
+                            ol {
+                                id = "steps"
                                 each(step) {
                                     insert(StepTemplate(), it)
                                 }
@@ -396,9 +497,37 @@ class RecipeTemplate(val main: MainTemplate = MainTemplate()) : Template<HTML> {
                                     div("step-image") {
                                         icon8("add_image", set = "dusk", size = 150, classes = "largeIcon8")
                                     }
-                                    p {
+                                    p("exportable") {
                                         +""
                                     }
+                                }
+                            }
+                            div("hide") {
+                                id = "steps-editor"
+                                ol("editor") {
+                                    contentEditable = true
+                                    id = "steps-list"
+                                }
+                                div("buttons") {
+                                    div("center") {
+                                        p("button big cancel") {
+                                            id = "list-cancel"
+                                            +"Abbrechen"
+                                        }
+                                        p("button big") {
+                                            id = "list-save"
+                                            +"Speichern"
+                                        }
+                                    }
+                                    p("error") {
+                                        id = "steps-error"
+                                    }
+                                }
+                            }
+                            div {
+                                id = "time-entry"
+                                em {
+                                    +"hinzugefügt: $created  (aktualisiert: $updated)"
                                 }
                             }
                         }
@@ -423,13 +552,14 @@ class MainTemplate : Template<HTML> {
             link(href = "https://img.icons8.com/ios-glyphs/30/000000/cooking-book.png", rel = "shortcut icon", type = "image/x-icon")
         }
         body {
+            div { id="test" }
             div("page-wrap") {
                 insert(MenuTemplate(), menu)
 
                 section {
                     id = "main"
-                    insert(content)
                     div("spinner")
+                    insert(content)
                     footer {
                         id = "footer"
                         div("copyright") {
@@ -459,6 +589,9 @@ class MainTemplate : Template<HTML> {
             script(src = "/static/js/util.js") {}
             script(src = "/static/js/custom.js") {}
             script(src = "/static/js/main.js") {}
+            script(src = "/static/kotlin.js") {}
+            script(src = "/static/kotlinx-html-js.js") {}
+            script(src = "/static/cookbook.js") {}
         }
     }
 }

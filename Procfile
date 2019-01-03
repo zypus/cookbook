@@ -1,1 +1,1 @@
-web: build/install/cookbook/bin/cookbook
+web: java -Dserver.port=$PORT $JAVA_OPTS -jar build/libs/cookbook-0.0.1.jar

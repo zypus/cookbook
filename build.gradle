@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 buildscript {
     repositories {
         jcenter()
@@ -5,6 +7,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
 
@@ -14,11 +17,15 @@ plugins {
 
 apply plugin: 'kotlin-multiplatform'
 apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
 
+def mainOutputs
 
 kotlin {
     targets {
-        fromPreset(presets.jvm, 'backend')
+        fromPreset(presets.jvm, 'backend') {
+            mainOutputs = compilations.main.output
+        }
         fromPreset(presets.js, 'frontend') {
             [tasks.getByName(compilations.main.compileKotlinTaskName), tasks.getByName(compilations.test.compileKotlinTaskName)]*.kotlinOptions {
                 languageVersion = "1.3"
@@ -29,57 +36,70 @@ kotlin {
         }
     }
     sourceSets {
-        backendMain
-        frontendMain
+        backendMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+                implementation "io.ktor:ktor-server-netty:$ktor_version"
+                implementation "ch.qos.logback:logback-classic:$logback_version"
+                implementation "io.ktor:ktor-server-core:$ktor_version"
+                implementation "io.ktor:ktor-html-builder:$ktor_version"
+                implementation "org.jetbrains:kotlin-css-jvm:1.0.0-pre.31-kotlin-1.2.41"
+                implementation "io.ktor:ktor-server-host-common:$ktor_version"
+                implementation "io.ktor:ktor-locations:$ktor_version"
+                implementation "io.ktor:ktor-server-sessions:$ktor_version"
+                implementation "io.ktor:ktor-auth:$ktor_version"
+                implementation "org.apache.commons:commons-lang3:3.0"
+                implementation "com.github.jkcclemens:khttp:-SNAPSHOT"
+                implementation "org.postgresql:postgresql:42.2.2"
+                implementation 'org.jetbrains.exposed:exposed:0.11.2'
+                implementation "com.amazonaws:aws-java-sdk:1.11.163"
+                implementation "com.beust:klaxon:3.0.1"
+                implementation "com.github.h0tk3y.betterParse:better-parse-jvm:0.4.0-alpha-3"
+            }
+        }
+        backendTest {
+            dependencies {
+                implementation "io.ktor:ktor-server-tests:$ktor_version"
+            }
+        }
+        frontendMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-html-js:0.6.12"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js"
+            }
+        }
     }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://kotlin.bintray.com/ktor' }
+    maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
+    maven { url "http://dl.bintray.com/kotlin/kotlinx.html/"}
+    maven { url "https://dl.bintray.com/hotkeytlt/maven" }
 }
 
 
 group 'cookbook'
 version '0.0.1'
-mainClassName = "io.ktor.server.netty.EngineMain"
-
+mainClassName = "com.zypus.ApplicationKt"
+//mainClassName = "io.ktor.server.netty.EngineMain"
+//
 //sourceSets {
-//    main.kotlin.srcDirs = main.java.srcDirs = ['src']
+//    main.kotlin.srcDirs = main.java.srcDirs = ['src/backendMain/kotlin']
 //    test.kotlin.srcDirs = test.java.srcDirs = ['test']
-//    main.resources.srcDirs = ['resources']
+//    main.resources.srcDirs = ['src/backendMain/resources']
 //    test.resources.srcDirs = ['testresources']
 //}
 
-repositories {
-    mavenLocal()
-    jcenter()
-    maven { url 'https://jitpack.io'}
-    maven { url 'https://kotlin.bintray.com/ktor' }
-    maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
-}
 
-dependencies {
-    backendMainImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    backendMainImplementation "io.ktor:ktor-server-netty:$ktor_version"
-    backendMainImplementation "ch.qos.logback:logback-classic:$logback_version"
-    backendMainImplementation "io.ktor:ktor-server-core:$ktor_version"
-    backendMainImplementation "io.ktor:ktor-html-builder:$ktor_version"
-    backendMainImplementation "org.jetbrains:kotlin-css-jvm:1.0.0-pre.31-kotlin-1.2.41"
-    backendMainImplementation "io.ktor:ktor-server-host-common:$ktor_version"
-    backendMainImplementation "io.ktor:ktor-locations:$ktor_version"
-    backendMainImplementation "io.ktor:ktor-server-sessions:$ktor_version"
-    backendMainImplementation "io.ktor:ktor-auth:$ktor_version"
-    backendMainImplementation "org.apache.commons:commons-lang3:3.0"
-    backendMainImplementation "com.github.jkcclemens:khttp:-SNAPSHOT"
-    backendMainImplementation "org.postgresql:postgresql:42.2.2"
-    backendMainImplementation 'org.jetbrains.exposed:exposed:0.11.2'
-    backendMainImplementation "com.amazonaws:aws-java-sdk:1.11.163"
-    backendMainImplementation "com.beust:klaxon:3.0.1"
-    backendTestCompile "io.ktor:ktor-server-tests:$ktor_version"
-
-    frontendMainImplementation "org.jetbrains.kotlin:kotlin-stdlib-js"
-}
-
-def webFolder = new File(project.buildDir, "../src/frontendMain/web")
+def webFolder = new File(project.buildDir, "../web")
 def frontendCompilations = kotlin.targets.frontend.compilations
 
 task populateWebFolder(dependsOn: [frontendMainClasses]) {
+    delete "web"
     doLast {
         copy {
             from frontendCompilations.main.output
@@ -96,18 +116,35 @@ task populateWebFolder(dependsOn: [frontendMainClasses]) {
 
 frontendJar.dependsOn(populateWebFolder)
 
-distributions {
-    main {
-       // baseName = 'cookbook'
-        contents {
-            from(backendJar)
-            from("src/backendMain/resources")
-            from("src/frontendMain/web")
-        }
+task shadowJarBackend(type: ShadowJar) {
+    dependsOn populateWebFolder
+    def target = kotlin.targets.backend
+    from target.compilations.main.output
+    def runtimeClasspath = target.compilations.main.runtimeDependencyFiles
+    configurations = [runtimeClasspath]
+
+    manifest {
+        attributes("Main-Class": "$mainClassName")
     }
+}
+
+task runBackend(type: JavaExec, dependsOn: [backendMainClasses, frontendJar]) {
+    main = "io.ktor.server.netty.EngineMain"
+    classpath {
+        [
+                kotlin.targets.backend.compilations.main.output,
+                configurations.backendRuntimeClasspath,
+        ]
+    }
+    args = []
 }
 
 // Heroku integration
 task stage(type: Copy) {
+    dependsOn populateWebFolder
     dependsOn installDist
+//    copy {
+//        from("src/frontendMain/web")
+//        into("build/install/cookbook/app/static")
+//    }
 }

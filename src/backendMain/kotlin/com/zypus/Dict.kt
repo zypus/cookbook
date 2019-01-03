@@ -31,7 +31,7 @@ object Dict {
 
     val indexEntries: MutableMap<String, MutableList<Pair<Long, Long>>> = hashMapOf()
 
-    val indexFile = File("deu-eng.index")
+    val indexFile = File("src/backendMain/resources/deu-eng.index")
 
     init {
         indexFile.useLines { lines ->
@@ -49,7 +49,7 @@ object Dict {
     fun definitions(word: String): List<String> {
         return indexEntries[word.toLowerCase()]?.map {
                 (start, size) ->
-            val dictStream = GZIPInputStream(File("deu-eng.dict.dz").inputStream())
+            val dictStream = GZIPInputStream(File("src/backendMain/resources/deu-eng.dict.dz").inputStream())
             dictStream.skip(start)
             val readPacket = dictStream.readPacketExact(size)
             readPacket.readerUTF8().readText().lines()[1]
