@@ -473,8 +473,7 @@ fun Application.module(testing: Boolean = false) {
                 if (title.escapeHTML() == categoryLoc.categoryName) {
                     call.respond(HttpStatusCode.OK)
                 } else {
-                    val processedTitle =
-                        title.words().joinToString(separator = " ") { it.toLowerCase().capitalize() }
+                    val processedTitle = title
                     try {
 
 
@@ -491,7 +490,7 @@ fun Application.module(testing: Boolean = false) {
                         return@post
                     }
 
-                    call.respondRedirect(application.locations.href(categoryLoc.copy(categoryName = processedTitle)))
+                    call.respondRedirect(application.locations.href(categoryLoc.copy(categoryName = processedTitle.escapeHTML())))
                 }
 
             }
@@ -505,8 +504,7 @@ fun Application.module(testing: Boolean = false) {
                 if (title.escapeHTML() == recipeLoc.name) {
                     call.respond(HttpStatusCode.OK)
                 } else {
-                    val processedTitle =
-                        title.words().joinToString(separator = " ") { it.toLowerCase().capitalize() }
+                    val processedTitle = title
                     try {
                         if (recipeLoc.name == "new") {
                             val principal: UserIdPrincipal? = call.authentication.principal()
@@ -527,7 +525,7 @@ fun Application.module(testing: Boolean = false) {
                         return@post
                     }
 
-                    call.respondRedirect(application.locations.href(recipeLoc.copy(name = processedTitle)))
+                    call.respondRedirect(application.locations.href(recipeLoc.copy(name = processedTitle.escapeHTML())))
                 }
 
             }

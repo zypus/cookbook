@@ -117,7 +117,7 @@ fun FlowOrPhrasingContent.highlighted(text: String, highlightLookup: Map<String,
 }
 
 fun String.words(): List<String> {
-    return this.split("[^A-za-zäöüÄÖÜ]".toRegex())
+    return this.split("[^A-Za-zäöüÄÖÜß-]".toRegex())
 }
 
 fun String.firstWord(): String {
@@ -129,7 +129,7 @@ fun String.lastWord(): String {
 }
 
 fun String.sanitise(): String {
-    return this.toLowerCase().replace("[^a-zäöü]".toRegex(), "")
+    return this.toLowerCase().replace("[^a-zäöüß]".toRegex(), "")
 }
 
 open class TemplatePlaceholderList<TTemplate : Template<TOuter>, TOuter>() {
