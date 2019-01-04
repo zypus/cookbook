@@ -368,7 +368,7 @@ fun main(args: Array<String>) {
 
                     request.onreadystatechange = {
                         if (request.readyState == 4.toShort()) {
-                            if (request.responseText.isBlank()) {
+                            if (request.status == 200.toShort()) {
                                 window.open(request.responseURL, "_self")
                             } else {
                                 window.alert(request.responseText)
