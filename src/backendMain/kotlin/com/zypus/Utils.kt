@@ -117,7 +117,7 @@ fun FlowOrPhrasingContent.highlighted(text: String, highlightLookup: Map<String,
 }
 
 fun String.words(): List<String> {
-    return this.split("[^A-Za-zäöüÄÖÜß-]".toRegex())
+    return this.split("[^A-Za-zäöüÄÖÜß]".toRegex())
 }
 
 fun String.firstWord(): String {
