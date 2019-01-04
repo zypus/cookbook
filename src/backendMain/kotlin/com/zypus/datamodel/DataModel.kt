@@ -5,6 +5,7 @@ import com.beust.klaxon.internal.firstNotNullResult
 import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
+import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.zypus.*
 import com.zypus.api.WordType
@@ -43,20 +44,22 @@ object IngredientsParser : Grammar<List<DataModel.Ingredient>>() {
     val num by token("\\d+(\\.\\d+)?")
     val dash by token("-")
     val slash by token("/")
-    val g by token("g ")
-    val l by token("l ")
-    val ml by token("ml ")
-    val ms by token("MS ")
-    val tbl by token("EL ")
-    val tsp by token("TL ")
-    val pk by token("Pk ")
-    val sg by token("sg ")
-    val prise by token("p ")
-    val word by token("[A-Za-zÄÖÜäöüß()\\[\\]-]+")
+
+
+    val measures = DataModel.getMeasures().flatMap {
+        (name, symbol) ->
+        val nameToken = Token(name ,"$name ".toRegex(RegexOption.IGNORE_CASE)).provideDelegate(this, ::num)
+        val symbolToken = Token(symbol, "$symbol ".toRegex(RegexOption.IGNORE_CASE)).provideDelegate(this, ::num)
+        listOf(nameToken.use { symbol }, symbolToken.use { symbol })
+    }
+
+
+    val word by token("[^\\s]+")
 
     val numParser by num use { text.toDouble() }
 
-    val unit by g or l or ml or ms or tbl or tsp or pk or prise use { text.trim() }
+    val unit by measures.reduce(Parser<String>::or)
+
     val ratio by numParser * -slash * numParser use {
         t1 / t2
     }
@@ -255,6 +258,14 @@ object DataModel {
         return transaction {
             CategoryEntity.all().map {
                 CategoryDb(it.id.value, it.name, it.image)
+            }
+        }
+    }
+
+    fun getMeasures(): List<Pair<String, String>> {
+        return transaction {
+            MeasureEntity.all().map {
+                it.name to it.symbol
             }
         }
     }
