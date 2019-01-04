@@ -106,6 +106,10 @@ fun main(args: Array<String>) {
 
         ingredientEditButton?.onclick = {
 
+            window.onbeforeunload = {
+                "true"
+            }
+
             ingredientEditButton?.addClass("never-show")
             stepsEditButton?.addClass("never-show")
 
@@ -144,6 +148,7 @@ fun main(args: Array<String>) {
         }
 
         ingredientCancelButton?.onclick = {
+            window.onbeforeunload = null
             ingredientEditor?.hide()
             table?.unhide()
             ingredientEditButton?.removeClass("never-show")
@@ -160,6 +165,7 @@ fun main(args: Array<String>) {
             request.onreadystatechange = {
                 if (request.readyState == 4.toShort()) {
                     if (request.responseText.isBlank()) {
+                        window.onbeforeunload = null
                         window.location.reload()
                     } else {
                         ingredientError?.textContent = request.responseText
@@ -172,6 +178,10 @@ fun main(args: Array<String>) {
 
 
         stepsEditButton?.onclick = {
+
+            window.onbeforeunload =  {
+                "true"
+            }
 
             ingredientEditButton?.addClass("never-show")
             stepsEditButton?.addClass("never-show")
@@ -208,6 +218,7 @@ fun main(args: Array<String>) {
         }
 
         stepsCancelButton?.onclick = {
+            window.onbeforeunload = null
             stepsEditor?.hide()
             stepsContainer?.unhide()
             ingredientEditButton?.removeClass("never-show")
@@ -225,6 +236,7 @@ fun main(args: Array<String>) {
             request.onreadystatechange = {
                 if (request.readyState == 4.toShort()) {
                     if (request.responseText.isBlank()) {
+                        window.onbeforeunload = null
                         window.location.reload()
                     } else {
                         stepsError?.textContent = request.responseText
