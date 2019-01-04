@@ -1,6 +1,5 @@
 package com.zypus
 
-import com.beust.klaxon.Klaxon
 import com.zypus.datamodel.DataModel
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -469,19 +468,15 @@ fun Application.module(testing: Boolean = false) {
 
                 val categoryLoc = loc.category
 
-                val klaxon = Klaxon()
-                val json = call.receiveText()
+                val title = call.receiveText()
 
-                data class Title(val title: String)
+                if (title.escapeHTML() == categoryLoc.categoryName) {
+                    call.respond(HttpStatusCode.OK)
+                } else {
+                    val processedTitle =
+                        title.words().joinToString(separator = " ") { it.toLowerCase().capitalize() }
+                    try {
 
-                val title = klaxon.parse<Title>(json)
-
-                if (title != null) {
-                    if (title.title.escapeHTML() == categoryLoc.categoryName) {
-                        call.respond(HttpStatusCode.OK)
-                    } else {
-                        val processedTitle =
-                            title.title.words().map { it.toLowerCase().capitalize() }.joinToString(separator = " ")
 
                         if (categoryLoc.categoryName == "new") {
                             DataModel.addCategory(processedTitle)
@@ -491,9 +486,12 @@ fun Application.module(testing: Boolean = false) {
                                 processedTitle
                             )
                         }
-
-                        call.respondRedirect(application.locations.href(categoryLoc.copy(categoryName = processedTitle)))
+                    } catch (e: Exception) {
+                        call.respond(e.message!!)
+                        return@post
                     }
+
+                    call.respondRedirect(application.locations.href(categoryLoc.copy(categoryName = processedTitle)))
                 }
 
             }
@@ -502,7 +500,6 @@ fun Application.module(testing: Boolean = false) {
 
                 val recipeLoc = loc.recipe
 
-                val klaxon = Klaxon()
                 val title = call.receiveText()
 
                 if (title.escapeHTML() == recipeLoc.name) {

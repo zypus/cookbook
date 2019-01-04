@@ -19,98 +19,6 @@ import kotlin.dom.removeClass
  * @created 2018-12-26
  */
 
-//"""
-//        $MAKEEDITABLE.click(function () {
-//            $('.editable').attr("contenteditable", true);
-//            $('.controls').removeClass("hide");
-//            $MAKEEDITABLE.addClass("never-show");
-//            $BTN.removeClass("hide");
-//            $CANCEL_BTN.removeClass("hide");
-//        });
-//
-//        $('.table-add').click(function () {
-//            var $clone = $TABLE.find('tr.hide:not(.header)').clone(true).removeClass('hide table-line');
-//            var $row = $(this).parents('tr');
-//            $row.after($clone);
-//            $clone.firstChild().focus()
-//        });
-//
-//        $('.table-remove').click(function () {
-//            var $row = $(this).parents('tr');
-//            if ($row.index() === 1 && $row.next().hasClass("hide")) return;
-//            $row.detach();
-//        });
-//
-//        $('.table-up').click(function () {
-//            var $row = $(this).parents('tr');
-//            if ($row.index() === 1) return; // Don't go above the header
-//            $row.prev().before($row.get(0));
-//        });
-//
-//        $('.table-down').click(function () {
-//            var $row = $(this).parents('tr');
-//            $row.next().after($row.get(0));
-//        });
-//
-//        $CANCEL_BTN.click(function () {
-//            location.reload()
-//        });
-//
-//// A few jQuery helpers for exporting only
-//        jQuery.fn.pop = [].pop;
-//        jQuery.fn.shift = [].shift;
-//
-//        $BTN.click(function () {
-//            var $rows = $TABLE.find('tr.header, tr:not(:hidden)');
-//            var headers = [];
-//            var data = [];
-//
-//            // Get the headers (add special header logic here)
-//            $($rows.shift()).find('th:not(:empty)').each(function () {
-//                headers.push($(this).text().toLowerCase());
-//            });
-//
-//            // Turn all existing rows into a loopable array
-//            $rows.each(function () {
-//                var $td = $(this).find('td.exportable');
-//                var h = {};
-//
-//                // Use the headers from earlier to name our hash keys
-//                headers.forEach(function (header, i) {
-//                    h[header] = $td.eq(i).text();
-//                });
-//
-//                data.push(h);
-//            });
-//
-//            // Output the result
-//
-//            var xhr = new XMLHttpRequest();
-//            xhr.open("POST", window.location.href + "/ingredients", true);
-//            xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-//
-//            xhr.onreadystatechange = function () {
-//                if (xhr.readyState === 4) {
-//                    if (xhr.status === 200) {
-//                        location.reload(true);
-//                        // $('.editable').attr("contenteditable", false);
-//                        // $('.controls').addClass("hide");
-//                        // $MAKEEDITABLE.removeClass("hide");
-//                        // $BTN.addClass("hide");
-//                        // $CANCEL_BTN.addClass("hide");
-//
-//                    } else {
-//                        alert("Save failed with status: " + xhr.status)
-//                    }
-//
-//                }
-//            };
-//
-//            xhr.send(JSON.stringify(data));
-//
-//        });
-//"""
-
 object KQuery {
 
     fun String.findElement(): Element? {
@@ -521,27 +429,6 @@ fun main(args: Array<String>) {
             }
 
         }
-
-
-//        ".has-tooltip".findHTMLCollection().asList().filter { it is HTMLImageElement }.forEach {
-//            val image = it as HTMLImageElement
-//
-//            image.onmouseenter = {
-//                println("test")
-//                image.append {
-//                    p("tooltip") {
-//                        +image.alt
-//                    }
-//                }
-//            }
-//
-//            image.onmouseleave = {
-//                image.getElementsByClassName("tooltip").asList().forEach {
-//                    it.remove()
-//                }
-//            }
-//
-//        }
 
     }
 
